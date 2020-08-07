@@ -1,0 +1,63 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+%files
+	/opt/APSIMClassic/ /usr/local/APSIMClassic
+
+%post
+
+	DEBIAN_FRONTEND=noninteractive apt-get update 
+	
+	DEBIAN_FRONTEND=noninteractive apt-get install -y \
+	apt-transport-https \
+	apt-utils \
+	software-properties-common \
+	add-apt-key
+	
+	DEBIAN_FRONTEND=noninteractive apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+	DEBIAN_FRONTEND=noninteractive add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/'
+	
+	DEBIAN_FRONTEND=noninteractive apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+	DEBIAN_FRONTEND=noninteractive add-apt-repository 'deb https://download.mono-project.com/repo/ubuntu stable-bionic main'
+  	
+	DEBIAN_FRONTEND=noninteractive apt-get update 
+	
+	
+	DEBIAN_FRONTEND=noninteractive apt-get install -y \
+	g++ \
+	gfortran \
+	mono-devel \
+	mono-vbnc
+	
+	DEBIAN_FRONTEND=noninteractive apt-get install -y \
+	libboost-all-dev \
+	libxml2-dev \
+	tcl-dev \
+	r-recommended
+	 
+	 
+	R --slave -e 'install.packages("rcpp", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("rinside", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("inline", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("xml2", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("snow", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("maps", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("maptools", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("stringr", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("doparallel", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("foreach", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("APSIM", repos="https://cloud.r-project.org/")'
+	R --slave -e 'install.packages("XML", repos="https://cloud.r-project.org/")'
+
+
+	cd /usr/local/APSIMClassic/Model/Build
+	chmod -R a+rwx /usr/local/APSIMClassic
+	sh /usr/local/APSIMClassic/Model/Build/BuildAll.sh || true
+	ldconfig
+
+%environment
+
+	export LC_ALL=C
+	export TZ=America/Chicago
+	export PATH=/usr/local/APSIMClassic/Model:$PATH
+	export LD_LIBRARY_PATH=/usr/local/APSIMClassic/Model:/lib:/lib64:/usr/lib:/usr/lib64:$LD_LIBRARY_PATH
